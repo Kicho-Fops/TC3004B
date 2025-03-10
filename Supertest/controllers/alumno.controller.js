@@ -22,6 +22,11 @@ const getAlumnoById = (req, res) => {
 const saveAlumno = (req, res) => {
     const {nombre, paterno, materno, nacimiento} = req.body
     //validar que el body tiene los atributos que se requieren
+
+    if(!nombre | !paterno | !materno | !nacimiento)
+        return res.status(400).json({ message: "Informacion incompleta" });
+
+
     const sql = `INSERT INTO alumno(nombre, paterno, materno, nacimiento)
                  VALUES(?,?,?,?)`;
     pool.query(sql, [nombre, paterno, materno, nacimiento], (err, results, fields) => {
@@ -41,8 +46,24 @@ const updateAlumno = (req, res) => {
             res.json(err)
         if(results.affectedRows > 0)
             res.json({ mensaje: "Registro actualizado"})
-        res.json({ mensaje: "Algo pasó!" })
+        else
+            res.json({ mensaje: "Algo pasó!" })
     })
 }
 
-module.exports = { getAlumno, updateAlumno, saveAlumno, getAlumnoById }
+const deleteAlumno = (req, res) => {
+
+    const { id } = req.params
+    const sql = "DELETE from alumno WHERE id=?";
+    pool.query(sql, [id] ,(err, results, fields) => {
+        if(err)
+            res.json(err)
+        if (results.affectedRows === 0) {
+            return res.status(404).json({ message: "Student not found" });
+        }
+        res.json(results)
+    })
+
+}
+
+module.exports = { getAlumno, updateAlumno, saveAlumno, getAlumnoById, deleteAlumno }
